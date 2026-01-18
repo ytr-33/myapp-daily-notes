@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    image: myapp-frontend:latest
+    container_name: myapp-frontend
+    volumes:
+      - ..:/workspace
+      - /workspace/node_modules
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=myapp_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    networks:
+      - myapp-network
+    command: sleep infinity
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    image: myapp-backend:latest
+    container_name: myapp-backend
+    volumes:
+      - ..:/workspace
+      - m2_cache:/home/vscode/.m2
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=myapp_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - myapp-network
+    command: sleep infinity
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: myapp-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: myapp_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - myapp-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  m2_cache:
+
+networks:
+  myapp-network:
+    driver: bridge
