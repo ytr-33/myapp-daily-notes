@@ -7,12 +7,12 @@ Daily Notes のフロントエンドアプリケーション。ユーザーが�
 
 | 項目 | バージョン |
 |------|-----------|
-| **フレームワーク** | Next.js | 16.1.4 |
-| **言語** | TypeScript | 5.x |
+| **フレームワーク** | Next.js 16.1.4 |
+| **言語** | TypeScript 5.x |
 | **React** | 19.2.3 |
-| **スタイリング** | Tailwind CSS | 4.x |
+| **スタイリング** | Tailwind CSS 4.x |
 | **ビルドツール** | Next.js (Webpack) |
-| **リンター** | ESLint | 9.x |
+| **リンター** | ESLint 9.x |
 | **パッケージマネージャー** | npm |
 
 ## プロジェクト構成
@@ -22,13 +22,12 @@ web/
 ├── app/                      # Next.js App Router
 │   ├── layout.tsx           # ルートレイアウト
 │   ├── page.tsx             # ホームページ
-│   └── globals.css          # グローバルスタイル
+│   └── globals.css          # グローバルスタイル / Tailwind CSS v4 設定（@import ベース）
 ├── public/                  # 静的ファイル
 ├── package.json             # 依存関係定義
 ├── tsconfig.json            # TypeScript設定
 ├── next.config.ts           # Next.js設定
 ├── postcss.config.mjs       # PostCSS設定
-├── tailwind.config.js       # Tailwind CSS設定
 ├── eslint.config.mjs        # ESLint設定
 └── next-env.d.ts            # Next.js型定義
 ```
