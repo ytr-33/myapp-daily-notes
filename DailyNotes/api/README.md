@@ -21,7 +21,7 @@ Spring Bootを使ったJavaのREST APIバックエンドサンプルプロジェ
 
 ```bash
 cd /workspace/DailyNotes/api
-mvn clean build
+mvn clean install
 ```
 
 ### 2. アプリケーションの起動
