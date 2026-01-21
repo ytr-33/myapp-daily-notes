@@ -10,6 +10,7 @@ services:
     volumes:
       - ..:/workspace
       - /workspace/node_modules
+      - m2_cache_frontend:/home/vscode/.m2
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432
@@ -17,6 +18,7 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
     ports:
       - "3000:3000"
     depends_on:
@@ -71,6 +73,7 @@ services:
 volumes:
   postgres_data:
   m2_cache:
+  m2_cache_frontend:
 
 networks:
   myapp-network:
