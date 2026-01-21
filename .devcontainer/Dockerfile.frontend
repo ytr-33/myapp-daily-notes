@@ -21,17 +21,6 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 # Install package managers
 RUN npm install -g yarn pnpm
 
-# Install Java 17
-RUN apt-get update && apt-get install -y \
-    openjdk-17-jdk \
-    openjdk-17-jdk-headless \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install Maven
-RUN apt-get update && apt-get install -y \
-    maven \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
 # Create vscode user
 RUN useradd -m -s /bin/bash vscode \
     && apt-get update && apt-get install -y sudo \
@@ -40,23 +29,6 @@ RUN useradd -m -s /bin/bash vscode \
 
 # Set working directory
 WORKDIR /workspace
-
-# Detect architecture and set JAVA_HOME accordingly
-RUN ARCH=$(dpkg --print-architecture) && \
-    if [ "$ARCH" = "arm64" ]; then \
-        echo "export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64" >> /etc/profile.d/java.sh; \
-        echo "export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64" >> /home/vscode/.bashrc; \
-    else \
-        echo "export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> /etc/profile.d/java.sh; \
-        echo "export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> /home/vscode/.bashrc; \
-    fi && \
-    echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> /etc/profile.d/java.sh && \
-    echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> /home/vscode/.bashrc && \
-    chmod +x /etc/profile.d/java.sh
-
-# Create Maven repository directory with correct permissions
-RUN mkdir -p /home/vscode/.m2/repository && \
-    chown -R vscode:vscode /home/vscode/.m2
 
 # Switch to vscode user
 USER vscode

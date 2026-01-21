@@ -1,52 +1,44 @@
-FROM ubuntu:22.04
+FROM maven:3.9-eclipse-temurin-17
 
-# Set environment variables
-ENV DEBIAN_FRONTEND=noninteractive
-ENV LANG=C.UTF-8
+# Install Node.js 20
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
 
-# Install system dependencies
+# Install additional tools
 RUN apt-get update && apt-get install -y \
+    git \
     curl \
     wget \
-    git \
-    build-essential \
-    ca-certificates \
-    gnupg \
-    lsb-release \
-    apt-transport-https \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install Java 17
-RUN apt-get update && apt-get install -y \
-    openjdk-17-jdk \
-    openjdk-17-jdk-headless \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install Maven
-RUN apt-get update && apt-get install -y \
-    maven \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install PostgreSQL client
-RUN apt-get update && apt-get install -y \
     postgresql-client \
+    sudo \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js package managers
+RUN npm install -g yarn pnpm
 
 # Create vscode user
 RUN useradd -m -s /bin/bash vscode \
-    && apt-get update && apt-get install -y sudo \
     && echo "vscode ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && mkdir -p /home/vscode/.m2/repository \
+    && chown -R vscode:vscode /home/vscode/.m2
+
+# Set Java environment dynamically based on architecture
+RUN ARCH=$(dpkg --print-architecture) && \
+    JAVA_HOME_PATH=$(dirname $(dirname $(readlink -f $(which java)))) && \
+    echo "export JAVA_HOME=${JAVA_HOME_PATH}" >> /etc/profile.d/java.sh && \
+    echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> /etc/profile.d/java.sh && \
+    chmod +x /etc/profile.d/java.sh
 
 # Set working directory
 WORKDIR /workspace
 
-# Set Java environment
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-ENV PATH=$JAVA_HOME/bin:$PATH
-
 # Switch to vscode user
 USER vscode
+
+# Add JAVA_HOME to user's bashrc
+RUN JAVA_HOME_PATH=$(dirname $(dirname $(readlink -f $(which java)))) && \
+    echo "export JAVA_HOME=${JAVA_HOME_PATH}" >> /home/vscode/.bashrc && \
+    echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> /home/vscode/.bashrc
 
 # Keep container running
 CMD ["/bin/bash"]

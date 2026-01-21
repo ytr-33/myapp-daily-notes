@@ -34,9 +34,5 @@
       "onAutoForward": "ignore"
     }
   },
-  "remoteEnv": {
-    "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-arm64"
-  },
-  "postCreateCommand": "bash -c 'if [ ! -d ~/.m2/repository ]; then mkdir -p ~/.m2/repository; fi'",
   "remoteUser": "vscode"
 }
