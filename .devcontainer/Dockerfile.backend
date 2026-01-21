@@ -1,33 +1,20 @@
 FROM maven:3.9-eclipse-temurin-17
 
-# Install Node.js 20
+# Install Node.js 20 and additional tools
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs
-
-# Install additional tools
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    wget \
-    postgresql-client \
-    sudo \
+    && apt-get update && apt-get install -y \
+        nodejs \
+        git \
+        postgresql-client \
+        sudo \
+    && npm install -g yarn pnpm \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js package managers
-RUN npm install -g yarn pnpm
-
-# Create vscode user
+# Create vscode user with .m2 setup
 RUN useradd -m -s /bin/bash vscode \
     && echo "vscode ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
     && mkdir -p /home/vscode/.m2/repository \
     && chown -R vscode:vscode /home/vscode/.m2
-
-# Set Java environment dynamically based on architecture
-RUN ARCH=$(dpkg --print-architecture) && \
-    JAVA_HOME_PATH=$(dirname $(dirname $(readlink -f $(which java)))) && \
-    echo "export JAVA_HOME=${JAVA_HOME_PATH}" >> /etc/profile.d/java.sh && \
-    echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> /etc/profile.d/java.sh && \
-    chmod +x /etc/profile.d/java.sh
 
 # Set working directory
 WORKDIR /workspace
@@ -35,10 +22,8 @@ WORKDIR /workspace
 # Switch to vscode user
 USER vscode
 
-# Add JAVA_HOME to user's bashrc
-RUN JAVA_HOME_PATH=$(dirname $(dirname $(readlink -f $(which java)))) && \
-    echo "export JAVA_HOME=${JAVA_HOME_PATH}" >> /home/vscode/.bashrc && \
-    echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> /home/vscode/.bashrc
+# Set JAVA_HOME in user's bashrc (maven image already has it, but ensure it's in shell)
+RUN echo "export JAVA_HOME=\$JAVA_HOME" >> /home/vscode/.bashrc
 
 # Keep container running
 CMD ["/bin/bash"]
