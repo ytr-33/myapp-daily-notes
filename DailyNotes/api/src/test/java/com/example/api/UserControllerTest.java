@@ -3,6 +3,7 @@ package com.example.api;
 import com.example.api.controller.UserController;
 import com.example.api.model.User;
 import com.example.api.model.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,6 +26,11 @@ public class UserControllerTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @AfterEach
+    public void tearDown() {
+        userRepository.deleteAll();
+    }
 
     @Test
     public void testGetAllUsers() throws Exception {
