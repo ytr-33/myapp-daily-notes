@@ -30,5 +30,5 @@
       "onAutoForward": "ignore"
     }
   },
-  "remoteUser": "node"
+  "remoteUser": "vscode"
 }
