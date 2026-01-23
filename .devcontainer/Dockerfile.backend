@@ -1,15 +1,10 @@
 FROM maven:3.9-eclipse-temurin-17
 
-# Install Node.js from official image to ensure integrity
-COPY --from=node:20-bookworm-slim /usr/local/bin /usr/local/bin
-COPY --from=node:20-bookworm-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
-
 # Install additional tools
 RUN apt-get update && apt-get install -y \
         git \
         postgresql-client \
         sudo \
-    && npm install -g pnpm \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create vscode user with .m2 setup
