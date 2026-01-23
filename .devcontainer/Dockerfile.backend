@@ -1,9 +1,11 @@
 FROM maven:3.9-eclipse-temurin-17
 
-# Install Node.js 20 and additional tools
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get update && apt-get install -y \
-        nodejs \
+# Install Node.js from official image to ensure integrity
+COPY --from=node:20-bookworm-slim /usr/local/bin /usr/local/bin
+COPY --from=node:20-bookworm-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
+
+# Install additional tools
+RUN apt-get update && apt-get install -y \
         git \
         postgresql-client \
         sudo \

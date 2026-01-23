@@ -3,9 +3,12 @@ package com.example.api.controller;
 import com.example.api.model.User;
 import com.example.api.model.UserRepository;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +20,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@Validated
 public class UserController {
 
     private final UserRepository userRepository;
@@ -45,6 +49,9 @@ public class UserController {
      */
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody @Valid User user) {
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
         User savedUser = userRepository.save(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
     }
@@ -58,6 +65,13 @@ public class UserController {
         
         if (userOptional.isPresent()) {
             User user = userOptional.get();
+
+            // 新しいメールアドレスが他のユーザーによって使用されていないか確認
+            Optional<User> userWithEmail = userRepository.findByEmail(userDetails.getEmail());
+            if (userWithEmail.isPresent() && !userWithEmail.get().getId().equals(id)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            }
+
             user.setName(userDetails.getName());
             user.setEmail(userDetails.getEmail());
             user.setPhone(userDetails.getPhone());
@@ -86,10 +100,7 @@ public class UserController {
      * メールアドレスでユーザーを検索
      */
     @GetMapping("/search/email")
-    public ResponseEntity<User> getUserByEmail(@RequestParam String email) {
-        if (email == null || email.trim().isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<User> getUserByEmail(@RequestParam @NotBlank @Email String email) {
         Optional<User> user = userRepository.findByEmail(email);
         return user.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
