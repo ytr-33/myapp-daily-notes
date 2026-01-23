@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
         git \
         postgresql-client \
         sudo \
-    && npm install -g yarn pnpm \
+    && npm install -g pnpm \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create vscode user with .m2 setup
