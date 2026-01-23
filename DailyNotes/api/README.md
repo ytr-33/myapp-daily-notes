@@ -99,6 +99,18 @@ GET /api/users/search/email?email=example@example.com
 mvn test
 ```
 
+## カバレッジレポート（JaCoCo）
+
+```bash
+mvn test
+```
+
+テスト実行後、以下にHTMLレポートが生成されます：
+
+```
+target/site/jacoco/index.html
+```
+
 ## H2データベースコンソール
 
 開発時にはH2データベースのコンソールにアクセスできます（開発プロファイル有効時）：

@@ -59,6 +59,83 @@ public class UserControllerTest {
     }
 
     @Test
+    public void testCreateUserValidationErrorInvalidEmail() throws Exception {
+        String userJson = """
+                {
+                    "name": "山田太郎",
+                    "email": "invalid-email",
+                    "phone": "090-1111-1111",
+                    "age": 35
+                }
+                """;
+
+        mockMvc.perform(post("/api/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.email").exists());
+    }
+
+    @Test
+    public void testCreateUserValidationErrorBlankName() throws Exception {
+        String userJson = """
+                {
+                    "name": "",
+                    "email": "blankname@example.com",
+                    "phone": "090-1111-1111",
+                    "age": 35
+                }
+                """;
+
+        mockMvc.perform(post("/api/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.name").exists());
+    }
+
+    @Test
+    public void testCreateUserValidationErrorNegativeAge() throws Exception {
+        String userJson = """
+                {
+                    "name": "山田太郎",
+                    "email": "negativeage@example.com",
+                    "phone": "090-1111-1111",
+                    "age": -1
+                }
+                """;
+
+        mockMvc.perform(post("/api/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.age").exists());
+    }
+
+    @Test
+    public void testCreateUserConflictEmail() throws Exception {
+        User existingUser = new User();
+        existingUser.setName("既存ユーザー");
+        existingUser.setEmail("duplicate@example.com");
+        existingUser.setAge(30);
+        userRepository.save(existingUser);
+
+        String userJson = """
+                {
+                    "name": "新規ユーザー",
+                    "email": "duplicate@example.com",
+                    "phone": "090-1111-1111",
+                    "age": 20
+                }
+                """;
+
+        mockMvc.perform(post("/api/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userJson))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
     public void testGetUserById() throws Exception {
         User user = new User();
         user.setName("テストユーザー");
@@ -94,6 +171,35 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("更新後"))
                 .andExpect(jsonPath("$.email").value("after@example.com"));
+    }
+
+    @Test
+    public void testUpdateUserConflictEmail() throws Exception {
+        User user1 = new User();
+        user1.setName("ユーザー1");
+        user1.setEmail("user1@example.com");
+        user1.setAge(20);
+        User savedUser1 = userRepository.save(user1);
+
+        User user2 = new User();
+        user2.setName("ユーザー2");
+        user2.setEmail("user2@example.com");
+        user2.setAge(25);
+        userRepository.save(user2);
+
+        String updateJson = """
+                {
+                    "name": "更新後",
+                    "email": "user2@example.com",
+                    "phone": "090-2222-2222",
+                    "age": 21
+                }
+                """;
+
+        mockMvc.perform(put("/api/users/" + savedUser1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(updateJson))
+                .andExpect(status().isConflict());
     }
 
     @Test
