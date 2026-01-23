@@ -132,17 +132,23 @@ api/
 │   ├── main/
 │   │   ├── java/com/example/api/
 │   │   │   ├── Application.java     # アプリケーションエントリーポイント
+│   │   │   ├── config/
+│   │   │   │   └── WebConfig.java
 │   │   │   ├── controller/
 │   │   │   │   ├── UserController.java
 │   │   │   │   └── HealthController.java
+│   │   │   ├── exception/
+│   │   │   │   └── GlobalExceptionHandler.java
 │   │   │   └── model/
 │   │   │       ├── User.java        # ユーザーエンティティ
 │   │   │       └── UserRepository.java
 │   │   └── resources/
+│   │       ├── application-dev.properties
 │   │       ├── application.properties
 │   │       └── data.sql             # 初期データ
 │   └── test/
 │       └── java/com/example/api/
+│           ├── HealthControllerTest.java
 │           └── UserControllerTest.java
 └── README.md
 ```
