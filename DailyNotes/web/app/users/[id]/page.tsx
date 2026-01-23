@@ -2,11 +2,12 @@ import Link from "next/link";
 import { getUserById } from "../../_mock/users";
 
 type PageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
-export default function UserDetailPage({ params }: PageProps) {
-  const userId = Number(params.id);
+export default async function UserDetailPage({ params }: PageProps) {
+  const { id } = await params;
+  const userId = Number(id);
   const user = getUserById(userId);
 
   return (
@@ -21,7 +22,7 @@ export default function UserDetailPage({ params }: PageProps) {
             <Link className="hover:text-zinc-900 dark:hover:text-white" href="/users">
               一覧へ戻る
             </Link>
-            <Link className="hover:text-zinc-900 dark:hover:text-white" href={`/users/${params.id}/edit`}>
+            <Link className="hover:text-zinc-900 dark:hover:text-white" href={`/users/${id}/edit`}>
               編集
             </Link>
           </nav>
