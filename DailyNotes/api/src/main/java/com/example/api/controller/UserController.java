@@ -87,6 +87,9 @@ public class UserController {
      */
     @GetMapping("/search/email")
     public ResponseEntity<User> getUserByEmail(@RequestParam String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
         Optional<User> user = userRepository.findByEmail(email);
         return user.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
