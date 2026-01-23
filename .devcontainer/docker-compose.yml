@@ -40,7 +40,6 @@ services:
       - DB_NAME=myapp_db
       - DB_USER=postgres
       - DB_PASSWORD=postgres
-      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
     ports:
       - "8080:8080"
     depends_on:
@@ -58,6 +57,7 @@ services:
       POSTGRES_DB: myapp_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
       - "5432:5432"
     networks:

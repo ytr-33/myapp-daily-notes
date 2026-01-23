@@ -1,52 +1,26 @@
-FROM ubuntu:22.04
+FROM maven:3.9-eclipse-temurin-17
 
-# Set environment variables
-ENV DEBIAN_FRONTEND=noninteractive
-ENV LANG=C.UTF-8
-
-# Install system dependencies
+# Install additional tools
 RUN apt-get update && apt-get install -y \
-    curl \
-    wget \
-    git \
-    build-essential \
-    ca-certificates \
-    gnupg \
-    lsb-release \
-    apt-transport-https \
+        git \
+        postgresql-client \
+        sudo \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Java 17
-RUN apt-get update && apt-get install -y \
-    openjdk-17-jdk \
-    openjdk-17-jdk-headless \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install Maven
-RUN apt-get update && apt-get install -y \
-    maven \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install PostgreSQL client
-RUN apt-get update && apt-get install -y \
-    postgresql-client \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Create vscode user
+# Create vscode user with .m2 setup
 RUN useradd -m -s /bin/bash vscode \
-    && apt-get update && apt-get install -y sudo \
     && echo "vscode ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && mkdir -p /home/vscode/.m2/repository \
+    && chown -R vscode:vscode /home/vscode/.m2
 
 # Set working directory
 WORKDIR /workspace
 
-# Set Java environment
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-ENV PATH=$JAVA_HOME/bin:$PATH
-
 # Switch to vscode user
 USER vscode
+
+# Set JAVA_HOME in user's bashrc (maven image already has it, but ensure it's in shell)
+RUN echo "export JAVA_HOME=\$JAVA_HOME" >> /home/vscode/.bashrc
 
 # Keep container running
 CMD ["/bin/bash"]
