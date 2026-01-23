@@ -32,6 +32,14 @@ mvn spring-boot:run
 
 アプリケーションは `http://localhost:8080` で起動します。
 
+#### 開発プロファイルでの起動（H2コンソール有効化）
+
+H2コンソールは `application-dev.properties` で有効化されています。開発プロファイルを指定して起動してください。
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
 ## APIエンドポイント
 
 ### ヘルスチェック
@@ -93,7 +101,7 @@ mvn test
 
 ## H2データベースコンソール
 
-開発時にはH2データベースのコンソールにアクセスできます：
+開発時にはH2データベースのコンソールにアクセスできます（開発プロファイル有効時）：
 
 ```
 http://localhost:8080/h2-console
