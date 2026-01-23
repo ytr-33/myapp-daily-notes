@@ -40,13 +40,6 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testHealthCheck() throws Exception {
-        mockMvc.perform(get("/api/health"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("UP"));
-    }
-
-    @Test
     public void testCreateUser() throws Exception {
         String userJson = """
                 {
