@@ -1,7 +1,17 @@
 import Link from "next/link";
-import { mockUsers } from "../_mock/users";
+import { revalidatePath } from "next/cache";
+import { getUsers, deleteUser } from "../_lib/api";
+import { DeleteButton, DetailButton, EditButton } from "./buttons";
 
-export default function UsersPage() {
+export default async function UsersPage() {
+  const users = await getUsers();
+
+  async function deleteUserAction(id: number) {
+    "use server";
+    await deleteUser(id);
+    revalidatePath("/users");
+  }
+
   return (
     <div className="min-h-screen bg-zinc-50 font-sans text-zinc-900 dark:bg-black dark:text-zinc-50">
       <header className="border-b border-zinc-200 bg-white px-6 py-4 dark:border-zinc-800 dark:bg-zinc-950">
@@ -26,12 +36,12 @@ export default function UsersPage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold">ユーザー一覧</h2>
-              <p className="text-sm text-zinc-500">登録済みユーザーを表示します（モック）。</p>
+              <p className="text-sm text-zinc-500">登録済みユーザーを表示します。</p>
             </div>
             <form className="flex w-full max-w-sm items-center gap-2">
               <input
                 className="w-full rounded-full border border-zinc-200 px-4 py-2 text-sm text-zinc-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
-                placeholder="メールで検索（モック）"
+                placeholder="メールで検索"
                 aria-label="メール検索"
               />
               <button
@@ -55,7 +65,7 @@ export default function UsersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                {mockUsers.map((user) => (
+                {users.map((user) => (
                   <tr key={user.id}>
                     <td className="py-3 pr-4 font-medium text-zinc-900 dark:text-zinc-100">
                       {user.name}
@@ -71,24 +81,18 @@ export default function UsersPage() {
                     </td>
                     <td className="py-3 pr-4">
                       <div className="flex flex-wrap gap-2 text-xs font-medium">
-                        <Link
-                          href={`/users/${user.id}`}
-                          className="rounded-full border border-zinc-200 px-3 py-1 text-zinc-700 hover:border-zinc-400 dark:border-zinc-700 dark:text-zinc-200"
-                        >
-                          詳細
-                        </Link>
-                        <Link
-                          href={`/users/${user.id}/edit`}
-                          className="rounded-full border border-zinc-200 px-3 py-1 text-zinc-700 hover:border-zinc-400 dark:border-zinc-700 dark:text-zinc-200"
-                        >
-                          編集
-                        </Link>
-                        <button
-                          type="button"
-                          className="rounded-full border border-red-200 px-3 py-1 text-red-600 hover:border-red-400 dark:border-red-700 dark:text-red-300"
-                        >
-                          削除
-                        </button>
+                        <DetailButton
+                          userId={user.id}
+                          className="px-3 py-1 text-xs"
+                        />
+                        <EditButton
+                          userId={user.id}
+                          className="px-3 py-1 text-xs"
+                        />
+                        <DeleteButton
+                          onDelete={deleteUserAction.bind(null, user.id)}
+                          className="px-3 py-1 text-xs"
+                        />
                       </div>
                     </td>
                   </tr>

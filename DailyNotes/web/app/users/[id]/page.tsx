@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { getUserById } from "../../_mock/users";
+import { redirect } from "next/navigation";
+import { getUserById, deleteUser } from "../../_lib/api";
+import { DeleteButton, EditButton } from "../buttons";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -8,7 +10,15 @@ type PageProps = {
 export default async function UserDetailPage({ params }: PageProps) {
   const { id } = await params;
   const userId = Number(id);
-  const user = getUserById(userId);
+  const user = await getUserById(userId);
+
+  async function deleteUserAction() {
+    "use server";
+    const success = await deleteUser(userId);
+    if (success) {
+      redirect("/users");
+    }
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50 font-sans text-zinc-900 dark:bg-black dark:text-zinc-50">
@@ -40,21 +50,13 @@ export default async function UserDetailPage({ params }: PageProps) {
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <h2 className="text-2xl font-semibold">{user.name}</h2>
-                <p className="text-sm text-zinc-500">最終更新: {user.updatedAt}</p>
+                <p className="text-sm text-zinc-500">
+                  最終更新: {user.updatedAt ?? "-"}
+                </p>
               </div>
               <div className="flex gap-2">
-                <Link
-                  href={`/users/${user.id}/edit`}
-                  className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 hover:border-zinc-400 dark:border-zinc-700 dark:text-zinc-200"
-                >
-                  編集
-                </Link>
-                <button
-                  type="button"
-                  className="rounded-full border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:border-red-400 dark:border-red-700 dark:text-red-300"
-                >
-                  削除
-                </button>
+                <EditButton userId={user.id} />
+                <DeleteButton onDelete={deleteUserAction} />
               </div>
             </div>
 

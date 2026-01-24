@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { getLatestUpdatedUser, mockUsers } from "./_mock/users";
+import { getHealthStatus, getUsers } from "./_lib/api";
 
-export default function Home() {
-  const latestUser = getLatestUpdatedUser();
+export default async function Home() {
+  const [users, health] = await Promise.all([getUsers(), getHealthStatus()]);
+  const latestUser = [...users].sort((a, b) => b.id - a.id)[0];
   return (
     <div className="min-h-screen bg-zinc-50 font-sans text-zinc-900 dark:bg-black dark:text-zinc-50">
       <header className="border-b border-zinc-200 bg-white px-6 py-4 dark:border-zinc-800 dark:bg-zinc-950">
@@ -30,20 +31,29 @@ export default function Home() {
           <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">API ステータス</h2>
-              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-200">
-                OK
-              </span>
+              {health?.status === "UP" ? (
+                <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-200">
+                  OK
+                </span>
+              ) : (
+                <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700 dark:bg-red-500/20 dark:text-red-200">
+                  NG
+                </span>
+              )}
             </div>
             <p className="mt-4 text-sm text-zinc-500">
-              ヘルスチェックは正常です（モック）。
+              {health
+                ? `ヘルスチェック: ${health.message ?? "API is running"}`
+                : "ヘルスチェックに失敗しました。"}
             </p>
           </div>
           <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
             <h2 className="text-lg font-semibold">ユーザー総数</h2>
-            <p className="mt-4 text-3xl font-semibold">{mockUsers.length}</p>
+            <p className="mt-4 text-3xl font-semibold">{users.length}</p>
             {latestUser && (
               <p className="mt-3 text-sm text-zinc-500">
-                最新更新: {latestUser.name}（{latestUser.updatedAt}）
+                最新ユーザー: {latestUser.name}
+                {latestUser.updatedAt ? `（${latestUser.updatedAt}）` : ""}
               </p>
             )}
           </div>

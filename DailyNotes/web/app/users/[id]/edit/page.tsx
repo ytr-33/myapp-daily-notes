@@ -1,13 +1,40 @@
 import Link from "next/link";
-import { getUserById } from "../../../_mock/users";
+import { redirect } from "next/navigation";
+import { getUserById, updateUser } from "../../../_lib/api";
 
 type PageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
-export default function UserEditPage({ params }: PageProps) {
-  const userId = Number(params.id);
-  const user = getUserById(userId);
+export default async function UserEditPage({ params }: PageProps) {
+  const { id } = await params;
+  const userId = Number(id);
+  const user = await getUserById(userId);
+
+  const updateUserAction = async (formData: FormData) => {
+    "use server";
+
+    const name = String(formData.get("name") ?? "").trim();
+    const email = String(formData.get("email") ?? "").trim();
+    const phoneRaw = String(formData.get("phone") ?? "").trim();
+    const ageRaw = String(formData.get("age") ?? "").trim();
+
+    if (!name || !email) {
+      return;
+    }
+
+    const payload = {
+      name,
+      email,
+      phone: phoneRaw ? phoneRaw : null,
+      age: ageRaw ? Number(ageRaw) : null,
+    };
+
+    const updated = await updateUser(userId, payload);
+    if (updated) {
+      redirect(`/users/${updated.id}`);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-zinc-50 font-sans text-zinc-900 dark:bg-black dark:text-zinc-50">
@@ -18,7 +45,7 @@ export default function UserEditPage({ params }: PageProps) {
             <h1 className="text-2xl font-semibold">ユーザー編集</h1>
           </div>
           <nav className="flex items-center gap-4 text-sm text-zinc-600 dark:text-zinc-300">
-            <Link className="hover:text-zinc-900 dark:hover:text-white" href={`/users/${params.id}`}>
+            <Link className="hover:text-zinc-900 dark:hover:text-white" href={`/users/${id}`}>
               詳細へ戻る
             </Link>
           </nav>
@@ -34,13 +61,15 @@ export default function UserEditPage({ params }: PageProps) {
         ) : (
           <section className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
             <h2 className="text-lg font-semibold">基本情報</h2>
-            <p className="mt-1 text-sm text-zinc-500">現在の情報を編集してください（モック）。</p>
+            <p className="mt-1 text-sm text-zinc-500">現在の情報を編集してください。</p>
 
-            <form className="mt-6 space-y-5">
+            <form action={updateUserAction} className="mt-6 space-y-5">
               <div>
                 <label className="text-sm font-medium">名前（必須）</label>
                 <input
                   defaultValue={user.name}
+                  name="name"
+                  required
                   className="mt-2 w-full rounded-xl border border-zinc-200 px-4 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
                 />
               </div>
@@ -49,6 +78,8 @@ export default function UserEditPage({ params }: PageProps) {
                 <input
                   type="email"
                   defaultValue={user.email}
+                  name="email"
+                  required
                   className="mt-2 w-full rounded-xl border border-zinc-200 px-4 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
                 />
               </div>
@@ -56,6 +87,7 @@ export default function UserEditPage({ params }: PageProps) {
                 <label className="text-sm font-medium">電話（任意）</label>
                 <input
                   defaultValue={user.phone ?? ""}
+                  name="phone"
                   className="mt-2 w-full rounded-xl border border-zinc-200 px-4 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
                 />
               </div>
@@ -64,13 +96,15 @@ export default function UserEditPage({ params }: PageProps) {
                 <input
                   type="number"
                   defaultValue={user.age ?? undefined}
+                  name="age"
+                  min={0}
                   className="mt-2 w-full rounded-xl border border-zinc-200 px-4 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
                 />
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
                 <button
-                  type="button"
+                  type="submit"
                   className="rounded-full bg-zinc-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
                 >
                   更新する

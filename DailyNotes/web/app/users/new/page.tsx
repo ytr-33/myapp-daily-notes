@@ -1,4 +1,31 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createUser } from "../../_lib/api";
+
+const createUserAction = async (formData: FormData) => {
+  "use server";
+
+  const name = String(formData.get("name") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim();
+  const phoneRaw = String(formData.get("phone") ?? "").trim();
+  const ageRaw = String(formData.get("age") ?? "").trim();
+
+  if (!name || !email) {
+    return;
+  }
+
+  const payload = {
+    name,
+    email,
+    phone: phoneRaw ? phoneRaw : null,
+    age: ageRaw ? Number(ageRaw) : null,
+  };
+
+  const created = await createUser(payload);
+  if (created) {
+    redirect(`/users/${created.id}`);
+  }
+};
 
 export default function UserCreatePage() {
   return (
@@ -20,12 +47,14 @@ export default function UserCreatePage() {
       <main className="mx-auto w-full max-w-3xl px-6 py-10">
         <section className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
           <h2 className="text-lg font-semibold">基本情報</h2>
-          <p className="mt-1 text-sm text-zinc-500">必須項目を入力してください（モック）。</p>
+          <p className="mt-1 text-sm text-zinc-500">必須項目を入力してください。</p>
 
-          <form className="mt-6 space-y-5">
+          <form action={createUserAction} className="mt-6 space-y-5">
             <div>
               <label className="text-sm font-medium">名前（必須）</label>
               <input
+                name="name"
+                required
                 className="mt-2 w-full rounded-xl border border-zinc-200 px-4 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
                 placeholder="例: 太郎"
               />
@@ -34,6 +63,8 @@ export default function UserCreatePage() {
               <label className="text-sm font-medium">メール（必須）</label>
               <input
                 type="email"
+                name="email"
+                required
                 className="mt-2 w-full rounded-xl border border-zinc-200 px-4 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
                 placeholder="例: taro@example.com"
               />
@@ -41,6 +72,7 @@ export default function UserCreatePage() {
             <div>
               <label className="text-sm font-medium">電話（任意）</label>
               <input
+                name="phone"
                 className="mt-2 w-full rounded-xl border border-zinc-200 px-4 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
                 placeholder="例: 090-1234-5678"
               />
@@ -49,6 +81,8 @@ export default function UserCreatePage() {
               <label className="text-sm font-medium">年齢（任意）</label>
               <input
                 type="number"
+                name="age"
+                min={0}
                 className="mt-2 w-full rounded-xl border border-zinc-200 px-4 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
                 placeholder="例: 28"
               />
@@ -56,7 +90,7 @@ export default function UserCreatePage() {
 
             <div className="flex flex-wrap items-center gap-3">
               <button
-                type="button"
+                type="submit"
                 className="rounded-full bg-zinc-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
               >
                 作成する
