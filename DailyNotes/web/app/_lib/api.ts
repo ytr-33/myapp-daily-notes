@@ -31,13 +31,16 @@ const buildApiUrl = (path: string) => {
   return `${getApiBaseUrl()}${normalizedPath}`;
 };
 
-const withJsonHeaders = (init?: RequestInit): RequestInit => ({
-  ...init,
-  headers: {
-    "Content-Type": "application/json",
-    ...(init?.headers ?? {}),
-  },
-});
+const withJsonHeaders = (init?: RequestInit): RequestInit => {
+  const headers = new Headers(init?.headers);
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+  return {
+    ...init,
+    headers,
+  };
+};
 
 export const getUsers = async (): Promise<User[]> => {
   try {
