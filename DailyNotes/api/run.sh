@@ -4,4 +4,4 @@
 cd "$(dirname "$0")"
 
 echo "Starting Spring Boot API..."
-mvn spring-boot:run
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
